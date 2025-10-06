@@ -1,0 +1,26 @@
+{
+    "name": "n2-rede-social-blog",
+    "version": "1.0.0",
+    "description": "Projeto N2 - Testes com Mocha, Chai e Sinon",
+    "main": "index.js",
+    "scripts": {
+      "test": "mocha test/**/*.test.js --timeout 5000"
+    },
+    "keywords": [
+      "testing",
+      "mocha",
+      "chai",
+      "sinon"
+    ],
+    "author": "Seu Nome",
+    "license": "ISC",
+    "dependencies": {
+      "axios": "^1.6.0"
+    },
+    "devDependencies": {
+      "mocha": "^10.2.0",
+      "chai": "^4.3.10",
+      "sinon": "^17.0.1",
+      "chai-http": "^4.4.0"
+    }
+  }

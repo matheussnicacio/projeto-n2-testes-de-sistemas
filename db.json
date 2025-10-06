@@ -1,0 +1,191 @@
+{
+    "users": [
+      {
+        "id": 1,
+        "name": "João Silva",
+        "email": "joao.silva@email.com",
+        "username": "joaosilva",
+        "phone": "(11) 98765-4321",
+        "city": "São Paulo"
+      },
+      {
+        "id": 2,
+        "name": "Maria Santos",
+        "email": "maria.santos@email.com",
+        "username": "mariasantos",
+        "phone": "(21) 99876-5432",
+        "city": "Rio de Janeiro"
+      },
+      {
+        "id": 3,
+        "name": "Pedro Oliveira",
+        "email": "pedro.oliveira@email.com",
+        "username": "pedrooliveira",
+        "phone": "(47) 91234-5678",
+        "city": "Joinville"
+      }
+    ],
+    "posts": [
+      {
+        "id": 1,
+        "userId": 1,
+        "title": "Meu primeiro post na rede social",
+        "content": "Este é o conteúdo do meu primeiro post. Estou muito animado!",
+        "likes": 15,
+        "createdAt": "2025-10-01T10:30:00Z"
+      },
+      {
+        "id": 2,
+        "userId": 1,
+        "title": "Aprendendo Node.js e testes",
+        "content": "Hoje estou estudando sobre testes automatizados com Mocha e Chai.",
+        "likes": 23,
+        "createdAt": "2025-10-02T14:15:00Z"
+      },
+      {
+        "id": 3,
+        "userId": 2,
+        "title": "Dicas de programação",
+        "content": "Compartilhando algumas dicas úteis para programadores iniciantes.",
+        "likes": 42,
+        "createdAt": "2025-10-01T09:00:00Z"
+      },
+      {
+        "id": 4,
+        "userId": 3,
+        "title": "Tecnologia em Joinville",
+        "content": "A cidade está crescendo muito no setor de tecnologia!",
+        "likes": 18,
+        "createdAt": "2025-10-02T16:45:00Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": 1,
+        "postId": 1,
+        "userId": 2,
+        "text": "Parabéns pelo primeiro post! Bem-vindo!",
+        "createdAt": "2025-10-01T11:00:00Z"
+      },
+      {
+        "id": 2,
+        "postId": 1,
+        "userId": 3,
+        "text": "Ótimo conteúdo, continue assim!",
+        "createdAt": "2025-10-01T11:30:00Z"
+      },
+      {
+        "id": 3,
+        "postId": 2,
+        "userId": 2,
+        "text": "Muito bom! Testes são essenciais.",
+        "createdAt": "2025-10-02T15:00:00Z"
+      },
+      {
+        "id": 4,
+        "postId": 2,
+        "userId": 3,
+        "text": "Recomendo estudar também TDD!",
+        "createdAt": "2025-10-02T15:30:00Z"
+      },
+      {
+        "id": 5,
+        "postId": 3,
+        "userId": 1,
+        "text": "Obrigado pelas dicas!",
+        "createdAt": "2025-10-01T10:00:00Z"
+      }
+    ],
+    "albums": [
+      {
+        "id": 1,
+        "userId": 1,
+        "title": "Viagem à praia",
+        "description": "Fotos das férias de verão"
+      },
+      {
+        "id": 2,
+        "userId": 2,
+        "title": "Eventos de tecnologia",
+        "description": "Conferências e meetups"
+      },
+      {
+        "id": 3,
+        "userId": 3,
+        "title": "Família",
+        "description": "Momentos especiais em família"
+      }
+    ],
+    "photos": [
+      {
+        "id": 1,
+        "albumId": 1,
+        "title": "Pôr do sol",
+        "url": "https://via.placeholder.com/600/92c952",
+        "thumbnailUrl": "https://via.placeholder.com/150/92c952"
+      },
+      {
+        "id": 2,
+        "albumId": 1,
+        "title": "Areia da praia",
+        "url": "https://via.placeholder.com/600/771796",
+        "thumbnailUrl": "https://via.placeholder.com/150/771796"
+      },
+      {
+        "id": 3,
+        "albumId": 2,
+        "title": "Palestra principal",
+        "url": "https://via.placeholder.com/600/24f355",
+        "thumbnailUrl": "https://via.placeholder.com/150/24f355"
+      },
+      {
+        "id": 4,
+        "albumId": 3,
+        "title": "Aniversário",
+        "url": "https://via.placeholder.com/600/d32776",
+        "thumbnailUrl": "https://via.placeholder.com/150/d32776"
+      }
+    ],
+    "todos": [
+      {
+        "id": 1,
+        "userId": 1,
+        "title": "Estudar para a prova de Node.js",
+        "completed": true,
+        "priority": "high",
+        "dueDate": "2025-10-15"
+      },
+      {
+        "id": 2,
+        "userId": 1,
+        "title": "Fazer exercícios de programação",
+        "completed": false,
+        "priority": "medium",
+        "dueDate": "2025-10-20"
+      },
+      {
+        "id": 3,
+        "userId": 2,
+        "title": "Revisar código do projeto",
+        "completed": true,
+        "priority": "high",
+        "dueDate": "2025-10-10"
+      },
+      {
+        "id": 4,
+        "userId": 2,
+        "title": "Documentar API REST",
+        "completed": false,
+        "priority": "low",
+        "dueDate": "2025-10-25"
+      },
+      {
+        "id": 5,
+        "userId": 3,
+        "title": "Participar do meetup",
+        "completed": false,
+        "priority": "medium",
+        "dueDate": "2025-10-18"
+      }
+    ]
+  }
