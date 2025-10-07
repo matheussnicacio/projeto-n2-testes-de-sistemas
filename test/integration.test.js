@@ -6,7 +6,7 @@ chai.use(chaiHttp);
 
 // IMPORTANTE: Substitua 'seu-usuario' pelo seu usuário do GitHub
 // Você precisa criar um repositório com arquivo db.json
-const BASE_URL = 'https://my-json-server.typicode.com/seu-usuario/seu-repositorio';
+const BASE_URL = 'https://my-json-server.typicode.com/GustavoABarbosa/n2-json-server';
 
 /*
   INSTRUÇÕES PARA NOTA 9:
@@ -290,5 +290,4 @@ describe('Testes de Integração - My JSON Server (NOTA 9)', () => {
         });
     });
   });
-
 });
