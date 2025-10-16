@@ -6,7 +6,7 @@ chai.use(chaiHttp);
 
 const BASE_URL = 'https://jsonplaceholder.typicode.com';
 
-describe('Testes de API - JSONPlaceholder (NOTA 8)', () => {
+describe('Testes de API - JSONPlaceholder', () => {
 
   // ========== TESTES DE USERS ==========
   
