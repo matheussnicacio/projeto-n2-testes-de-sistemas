@@ -36,7 +36,7 @@ const BASE_URL = 'https://my-json-server.typicode.com/GustavoABarbosa/n2-json-se
   4. Execute os testes: npm test
 */
 
-describe('Testes de Integração - My JSON Server (NOTA 9)', () => {
+describe('Testes de Integração - My JSON Server', () => {
 
   // ========== TESTES DE USERS ==========
   
