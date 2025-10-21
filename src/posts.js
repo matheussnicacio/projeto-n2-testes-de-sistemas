@@ -2,25 +2,19 @@ const axios = require('axios');
 
 const BASE_URL = 'https://jsonplaceholder.typicode.com';
 
-/**
- * Busca todos os posts
- */
+// Busca todos os posts
 async function getAllPosts() {
   const response = await axios.get(`${BASE_URL}/posts`);
   return response.data;
 }
 
-/**
- * Busca post por ID
- */
+// Busca post por ID
 async function getPostById(id) {
   const response = await axios.get(`${BASE_URL}/posts/${id}`);
   return response.data;
 }
 
-/**
- * Filtra posts por userId
- */
+// Filtra posts por userId
 function filterPostsByUser(posts, userId) {
   if (!Array.isArray(posts)) {
     return [];
@@ -28,9 +22,7 @@ function filterPostsByUser(posts, userId) {
   return posts.filter(post => post.userId === userId);
 }
 
-/**
- * Cria objeto de post fake
- */
+// Cria objeto de post fake
 function createFakePost(userId, title, body) {
   if (!userId || !title || !body) {
     throw new Error('Todos os campos são obrigatórios');
@@ -43,17 +35,13 @@ function createFakePost(userId, title, body) {
   };
 }
 
-/**
- * Valida estrutura do post
- */
+// Valida estrutura do post
 function validatePost(post) {
   const requiredFields = ['userId', 'id', 'title', 'body'];
   return requiredFields.every(field => post.hasOwnProperty(field));
 }
 
-/**
- * Calcula tamanho médio dos títulos
- */
+// Calcula tamanho médio dos títulos
 function averageTitleLength(posts) {
   if (!Array.isArray(posts) || posts.length === 0) {
     return 0;

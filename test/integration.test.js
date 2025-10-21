@@ -4,37 +4,7 @@ const expect = chai.expect;
 
 chai.use(chaiHttp);
 
-// IMPORTANTE: Substitua 'seu-usuario' pelo seu usuário do GitHub
-// Você precisa criar um repositório com arquivo db.json
 const BASE_URL = 'https://my-json-server.typicode.com/GustavoABarbosa/n2-json-server';
-
-/*
-  INSTRUÇÕES PARA NOTA 9:
-  
-  1. Crie um repositório público no GitHub (ex: "n2-json-server")
-  
-  2. Crie um arquivo db.json na raiz com este conteúdo de exemplo:
-  
-  {
-    "users": [
-      { "id": 1, "name": "João Silva", "email": "joao@email.com" },
-      { "id": 2, "name": "Maria Santos", "email": "maria@email.com" }
-    ],
-    "posts": [
-      { "id": 1, "userId": 1, "title": "Primeiro Post", "content": "Conteúdo" },
-      { "id": 2, "userId": 2, "title": "Segundo Post", "content": "Mais conteúdo" }
-    ],
-    "comments": [
-      { "id": 1, "postId": 1, "text": "Ótimo post!" },
-      { "id": 2, "postId": 1, "text": "Muito bom!" }
-    ]
-  }
-  
-  3. Atualize a constante BASE_URL acima com:
-     'https://my-json-server.typicode.com/SEU-USUARIO/SEU-REPO'
-  
-  4. Execute os testes: npm test
-*/
 
 describe('Testes de Integração - My JSON Server', () => {
 
@@ -77,6 +47,7 @@ describe('Testes de Integração - My JSON Server', () => {
           expect(user).to.include.keys('id', 'name', 'email');
           expect(user.id).to.be.a('number');
           expect(user.name).to.be.a('string');
+          // Valida formato básico de email (string contendo "@" e ".", nessa ordem)
           expect(user.email).to.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/);
           done();
         });
@@ -161,21 +132,18 @@ describe('Testes de Integração - My JSON Server', () => {
     it('deve buscar usuário e seus posts relacionados', (done) => {
       let userId;
       
-      // Primeiro busca o usuário
       chai.request(BASE_URL)
         .get('/users/1')
         .end((err, userRes) => {
           expect(userRes).to.have.status(200);
           userId = userRes.body.id;
           
-          // Depois busca os posts desse usuário
           chai.request(BASE_URL)
             .get(`/posts?userId=${userId}`)
             .end((err, postsRes) => {
               expect(postsRes).to.have.status(200);
               expect(postsRes.body).to.be.an('array');
               
-              // Verifica que todos os posts são do usuário correto
               postsRes.body.forEach(post => {
                 expect(post.userId).to.equal(userId);
               });
@@ -189,21 +157,18 @@ describe('Testes de Integração - My JSON Server', () => {
     it('deve buscar post e seus comentários relacionados', (done) => {
       let postId;
       
-      // Primeiro busca o post
       chai.request(BASE_URL)
         .get('/posts/1')
         .end((err, postRes) => {
           expect(postRes).to.have.status(200);
           postId = postRes.body.id;
           
-          // Depois busca os comentários desse post
           chai.request(BASE_URL)
             .get(`/comments?postId=${postId}`)
             .end((err, commentsRes) => {
               expect(commentsRes).to.have.status(200);
               expect(commentsRes.body).to.be.an('array');
               
-              // Verifica que todos os comentários são do post correto
               commentsRes.body.forEach(comment => {
                 expect(comment.postId).to.equal(postId);
               });
@@ -215,14 +180,12 @@ describe('Testes de Integração - My JSON Server', () => {
 
   describe('Integração completa: User -> Posts -> Comments', () => {
     it('deve navegar por toda a hierarquia de dados', (done) => {
-      // 1. Busca usuário
       chai.request(BASE_URL)
         .get('/users/1')
         .end((err, userRes) => {
           expect(userRes).to.have.status(200);
           const userId = userRes.body.id;
           
-          // 2. Busca posts do usuário
           chai.request(BASE_URL)
             .get(`/posts?userId=${userId}`)
             .end((err, postsRes) => {
@@ -231,7 +194,6 @@ describe('Testes de Integração - My JSON Server', () => {
               if (postsRes.body.length > 0) {
                 const firstPostId = postsRes.body[0].id;
                 
-                // 3. Busca comentários do primeiro post
                 chai.request(BASE_URL)
                   .get(`/comments?postId=${firstPostId}`)
                   .end((err, commentsRes) => {

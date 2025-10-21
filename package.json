@@ -4,7 +4,7 @@
     "description": "Projeto N2 - Testes com Mocha, Chai e Sinon",
     "main": "index.js",
     "scripts": {
-      "test": "mocha test/**/*.test.js --timeout 5000"
+      "test": "mocha test/**/*.test.js"
     },
     "keywords": [
       "testing",
@@ -12,7 +12,7 @@
       "chai",
       "sinon"
     ],
-    "author": "Seu Nome",
+    "author": "Gustavo",
     "license": "ISC",
     "dependencies": {
       "axios": "^1.6.0"

@@ -2,25 +2,19 @@ const axios = require('axios');
 
 const BASE_URL = 'https://jsonplaceholder.typicode.com';
 
-/**
- * Busca comentários de um post
- */
+// Busca comentários de um post
 async function getCommentsByPost(postId) {
   const response = await axios.get(`${BASE_URL}/posts/${postId}/comments`);
   return response.data;
 }
 
-/**
- * Busca todos os comentários
- */
+// Busca todos os comentários
 async function getAllComments() {
   const response = await axios.get(`${BASE_URL}/comments`);
   return response.data;
 }
 
-/**
- * Filtra comentários por email domain
- */
+// Filtra comentários por email domain
 function filterCommentsByEmail(comments, emailDomain) {
   if (!Array.isArray(comments)) {
     return [];
@@ -28,27 +22,21 @@ function filterCommentsByEmail(comments, emailDomain) {
   return comments.filter(comment => comment.email.includes(emailDomain));
 }
 
-/**
- * Conta comentários de um array
- */
+// Conta comentários de um array
 function countComments(comments) {
   return Array.isArray(comments) ? comments.length : 0;
 }
 
-/**
- * Valida estrutura de comentário
- */
+// Valida estrutura de comentário
 function validateComment(comment) {
-  return comment && 
-         comment.hasOwnProperty('postId') &&
-         comment.hasOwnProperty('name') &&
-         comment.hasOwnProperty('email') &&
-         comment.hasOwnProperty('body');
+  return comment &&
+    comment.hasOwnProperty('postId') &&
+    comment.hasOwnProperty('name') &&
+    comment.hasOwnProperty('email') &&
+    comment.hasOwnProperty('body');
 }
 
-/**
- * Cria objeto de comentário fake
- */
+// Cria objeto de comentário fake
 function createFakeComment(postId, name, email, body) {
   if (!postId || !name || !email || !body) {
     throw new Error('Todos os campos são obrigatórios');

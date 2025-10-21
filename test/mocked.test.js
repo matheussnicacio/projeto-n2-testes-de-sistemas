@@ -11,7 +11,7 @@ const todos = require('../src/todos');
 describe('Testes Mockados/Stubados com Sinon', () => {
 
   afterEach(() => {
-    sinon.restore(); // Limpa todos os stubs após cada teste
+    sinon.restore();
   });
 
   // MOCK 1: Stub de getAllUsers
