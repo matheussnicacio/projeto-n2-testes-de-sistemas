@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posts - JSONPlaceholder Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5em;
+        }
+        .nav {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .nav a {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .nav a:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .controls select, .controls button {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .controls button {
+            background: #667eea;
+            color: white;
+            transition: all 0.3s;
+        }
+        .controls button:hover {
+            background: #764ba2;
+        }
+        #postsContainer {
+            display: grid;
+            gap: 20px;
+        }
+        .post-item {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+        .post-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .post-title {
+            color: #333;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .post-body {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .post-meta {
+            color: #999;
+            font-size: 0.9em;
+            display: flex;
+            gap: 20px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Lista de Posts</h1>
+        
+        <div class="nav">
+            <a href="index.html">🏠 Home</a>
+            <a href="users.html">👥 Usuários</a>
+            <a href="comments.html">💬 Comentários</a>
+            <a href="todos.html">✅ Tarefas</a>
+            <a href="albums.html">📸 Álbuns</a>
+        </div>
+
+        <div class="controls">
+            <select id="userFilter">
+                <option value="">Todos os usuários</option>
+                <option value="1">Usuário 1</option>
+                <option value="2">Usuário 2</option>
+                <option value="3">Usuário 3</option>
+            </select>
+            <button id="filterBtn">🔍 Filtrar</button>
+            <button id="loadPosts">🔄 Carregar Posts</button>
+        </div>
+
+        <div id="postsContainer">
+            <div class="loading">Carregando posts...</div>
+        </div>
+    </div>
+
+    <script>
+        const postsContainer = document.getElementById('postsContainer');
+        const userFilter = document.getElementById('userFilter');
+        const filterBtn = document.getElementById('filterBtn');
+        const loadPostsBtn = document.getElementById('loadPosts');
+
+        async function loadPosts(userId = null) {
+            try {
+                const url = userId 
+                    ? `http://localhost:3000/posts?userId=${userId}`
+                    : 'http://localhost:3000/posts';
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Erro ao carregar posts');
+                
+                const posts = await response.json();
+                displayPosts(posts);
+            } catch (error) {
+                postsContainer.innerHTML = `<div class="loading">Erro: ${error.message}</div>`;
+            }
+        }
+
+        function displayPosts(posts) {
+            if (posts.length === 0) {
+                postsContainer.innerHTML = '<p class="loading">Nenhum post encontrado.</p>';
+                return;
+            }
+
+            postsContainer.innerHTML = posts.map(post => `
+                <div class="post-item">
+                    <div class="post-title">${post.title}</div>
+                    <div class="post-body">${post.body}</div>
+                    <div class="post-meta">
+                        <span>📌 Post ID: ${post.id}</span>
+                        <span>👤 User ID: ${post.userId}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        filterBtn.addEventListener('click', () => {
+            const userId = userFilter.value;
+            loadPosts(userId || null);
+        });
+
+        loadPostsBtn.addEventListener('click', () => {
+            userFilter.value = '';
+            loadPosts();
+        });
+
+        loadPosts();
+    </script>
+</body>
+</html>
+
+<!-- ========================================
+     ARQUIVO 2: comments.html
+     ======================================== -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comments - JSONPlaceholder Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5em;
+        }
+        .nav {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .nav a {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .nav a:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .controls select, .controls button {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .controls button {
+            background: #667eea;
+            color: white;
+            transition: all 0.3s;
+        }
+        .controls button:hover {
+            background: #764ba2;
+        }
+        #commentsContainer {
+            display: grid;
+            gap: 20px;
+        }
+        .comment-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+        .comment-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .comment-name {
+            color: #333;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .comment-email {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+        .comment-body {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        .comment-meta {
+            color: #999;
+            font-size: 0.85em;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💬 Comentários</h1>
+        
+        <div class="nav">
+            <a href="index.html">🏠 Home</a>
+            <a href="posts.html">📝 Posts</a>
+            <a href="users.html">👥 Usuários</a>
+            <a href="todos.html">✅ Tarefas</a>
+            <a href="albums.html">📸 Álbuns</a>
+        </div>
+
+        <div class="controls">
+            <select id="postFilter">
+                <option value="">Todos os posts</option>
+                <option value="1">Post 1</option>
+                <option value="2">Post 2</option>
+                <option value="3">Post 3</option>
+                <option value="4">Post 4</option>
+            </select>
+            <button id="filterBtn">🔍 Filtrar</button>
+            <button id="loadAll">🔄 Carregar Todos</button>
+        </div>
+
+        <div id="commentsContainer">
+            <div class="loading">Carregando comentários...</div>
+        </div>
+    </div>
+
+    <script>
+        const commentsContainer = document.getElementById('commentsContainer');
+        const postFilter = document.getElementById('postFilter');
+        const filterBtn = document.getElementById('filterBtn');
+        const loadAllBtn = document.getElementById('loadAll');
+
+        async function loadComments(postId = null) {
+            try {
+                const url = postId 
+                    ? `http://localhost:3000/comments?postId=${postId}`
+                    : 'http://localhost:3000/comments';
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Erro ao carregar comentários');
+                
+                const comments = await response.json();
+                displayComments(comments);
+            } catch (error) {
+                commentsContainer.innerHTML = `<div class="loading">Erro: ${error.message}</div>`;
+            }
+        }
+
+        function displayComments(comments) {
+            if (comments.length === 0) {
+                commentsContainer.innerHTML = '<p class="loading">Nenhum comentário encontrado.</p>';
+                return;
+            }
+
+            commentsContainer.innerHTML = comments.map(comment => `
+                <div class="comment-item">
+                    <div class="comment-name">💭 ${comment.name}</div>
+                    <div class="comment-email">📧 ${comment.email}</div>
+                    <div class="comment-body">${comment.body}</div>
+                    <div class="comment-meta">
+                        📌 Comment ID: ${comment.id} | Post ID: ${comment.postId}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        filterBtn.addEventListener('click', () => {
+            const postId = postFilter.value;
+            loadComments(postId || null);
+        });
+
+        loadAllBtn.addEventListener('click', () => {
+            postFilter.value = '';
+            loadComments();
+        });
+
+        loadComments();
+    </script>
+</body>
+</html>
+
+<!-- ========================================
+     ARQUIVO 3: todos.html
+     ======================================== -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todos - JSONPlaceholder Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5em;
+        }
+        .nav {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .nav a {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .nav a:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .filters button {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            background: white;
+            color: #667eea;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .filters button:hover, .filters button.active {
+            background: #667eea;
+            color: white;
+        }
+        #todosContainer {
+            display: grid;
+            gap: 15px;
+        }
+        .todo-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #999;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .todo-item.completed {
+            border-left-color: #28a745;
+            opacity: 0.7;
+        }
+        .todo-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .todo-status {
+            font-size: 2em;
+            flex-shrink: 0;
+        }
+        .todo-content {
+            flex: 1;
+        }
+        .todo-title {
+            color: #333;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        .todo-meta {
+            color: #999;
+            font-size: 0.9em;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✅ Tarefas (Todos)</h1>
+        
+        <div class="nav">
+            <a href="index.html">🏠 Home</a>
+            <a href="posts.html">📝 Posts</a>
+            <a href="users.html">👥 Usuários</a>
+            <a href="comments.html">💬 Comentários</a>
+            <a href="albums.html">📸 Álbuns</a>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalCount">0</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completedCount">0</div>
+                <div class="stat-label">Concluídas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingCount">0</div>
+                <div class="stat-label">Pendentes</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <button data-filter="all" class="active">📋 Todas</button>
+            <button data-filter="completed">✅ Concluídas</button>
+            <button data-filter="pending">⭕ Pendentes</button>
+        </div>
+
+        <div id="todosContainer">
+            <div class="loading">Carregando tarefas...</div>
+        </div>
+    </div>
+
+    <script>
+        const todosContainer = document.getElementById('todosContainer');
+        const filterButtons = document.querySelectorAll('.filters button');
+        let allTodos = [];
+        let currentFilter = 'all';
+
+        async function loadTodos() {
+            try {
+                const response = await fetch('http://localhost:3000/todos');
+                if (!response.ok) throw new Error('Erro ao carregar tarefas');
+                
+                allTodos = await response.json();
+                updateStats();
+                displayTodos(allTodos);
+            } catch (error) {
+                todosContainer.innerHTML = `<div class="loading">Erro: ${error.message}</div>`;
+            }
+        }
+
+        function updateStats() {
+            const total = allTodos.length;
+            const completed = allTodos.filter(t => t.completed).length;
+            const pending = total - completed;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('pendingCount').textContent = pending;
+        }
+
+        function displayTodos(todos) {
+            if (todos.length === 0) {
+                todosContainer.innerHTML = '<p class="loading">Nenhuma tarefa encontrada.</p>';
+                return;
+            }
+
+            todosContainer.innerHTML = todos.map(todo => `
+                <div class="todo-item ${todo.completed ? 'completed' : ''}">
+                    <div class="todo-status">${todo.completed ? '✅' : '⭕'}</div>
+                    <div class="todo-content">
+                        <div class="todo-title">${todo.title}</div>
+                        <div class="todo-meta">
+                            📌 Todo ID: ${todo.id} | 👤 User ID: ${todo.userId} | 
+                            Status: ${todo.completed ? 'Concluída' : 'Pendente'}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterTodos(filter) {
+            currentFilter = filter;
+            let filtered;
+
+            switch(filter) {
+                case 'completed':
+                    filtered = allTodos.filter(t => t.completed);
+                    break;
+                case 'pending':
+                    filtered = allTodos.filter(t => !t.completed);
+                    break;
+                default:
+                    filtered = allTodos;
+            }
+
+            displayTodos(filtered);
+        }
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                filterTodos(button.dataset.filter);
+            });
+        });
+
+        loadTodos();
+    </script>
+</body>
+</html>
+
+<!-- ========================================
+     ARQUIVO 4: albums.html
+     ======================================== -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Albums - JSONPlaceholder Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5em;
+        }
+        .nav {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .nav a {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .nav a:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .controls select, .controls button {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .controls button {
+            background: #667eea;
+            color: white;
+            transition: all 0.3s;
+        }
+        .controls button:hover {
+            background: #764ba2;
+        }
+        #albumsContainer {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .album-item {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .album-item:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+        }
+        .album-icon {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .album-title {
+            color: #333;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .album-meta {
+            color: #999;
+            font-size: 0.9em;
+            text-align: center;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📸 Álbuns</h1>
+        
+        <div class="nav">
+            <a href="index.html">🏠 Home</a>
+            <a href="posts.html">📝 Posts</a>
+            <a href="users.html">👥 Usuários</a>
+            <a href="comments.html">💬 Comentários</a>
+            <a href="todos.html">✅ Tarefas</a>
+        </div>
+
+        <div class="controls">
+            <select id="userFilter">
+                <option value="">Todos os usuários</option>
+                <option value="1">Usuário 1</option>
+                <option value="2">Usuário 2</option>
+                <option value="3">Usuário 3</option>
+            </select>
+            <button id="filterBtn">🔍 Filtrar</button>
+            <button id="loadAll">🔄 Carregar Todos</button>
+        </div>
+
+        <div id="albumsContainer">
+            <div class="loading">Carregando álbuns...</div>
+        </div>
+    </div>
+
+    <script>
+        const albumsContainer = document.getElementById('albumsContainer');
+        const userFilter = document.getElementById('userFilter');
+        const filterBtn = document.getElementById('filterBtn');
+        const loadAllBtn = document.getElementById('loadAll');
+
+        const albumIcons = ['📸', '🖼️', '🎨', '📷', '🌄', '🎭', '🎪', '🎬'];
+
+        async function loadAlbums(userId = null) {
+            try {
+                const url = userId 
+                    ? `http://localhost:3000/albums?userId=${userId}`
+                    : 'http://localhost:3000/albums';
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Erro ao carregar álbuns');
+                
+                const albums = await response.json();
+                displayAlbums(albums);
+            } catch (error) {
+                albumsContainer.innerHTML = `<div class="loading">Erro: ${error.message}</div>`;
+            }
+        }
+
+        function displayAlbums(albums) {
+            if (albums.length === 0) {
+                albumsContainer.innerHTML = '<p class="loading">Nenhum álbum encontrado.</p>';
+                return;
+            }
+
+            albumsContainer.innerHTML = albums.map((album, index) => {
+                const icon = albumIcons[index % albumIcons.length];
+                return `
+                    <div class="album-item">
+                        <div class="album-icon">${icon}</div>
+                        <div class="album-title">${album.title}</div>
+                        <div class="album-meta">
+                            📌 Álbum #${album.id} | 👤 Usuário #${album.userId}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        filterBtn.addEventListener('click', () => {
+            const userId = userFilter.value;
+            loadAlbums(userId || null);
+        });
+
+        loadAllBtn.addEventListener('click', () => {
+            userFilter.value = '';
+            loadAlbums();
+        });
+
+        loadAlbums();
+    </script>
+</body>
+</html>

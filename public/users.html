@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - JSONPlaceholder Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5em;
+        }
+        .nav {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .nav a {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .nav a:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        .search-box {
+            margin-bottom: 20px;
+        }
+        #searchUser {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        #usersContainer {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .user-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+        .user-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .user-name {
+            color: #333;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .user-email {
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .user-username {
+            color: #999;
+            font-size: 0.9em;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Lista de Usuários</h1>
+        
+        <div class="nav">
+            <a href="index.html">Home</a>
+            <a href="posts.html">Posts</a>
+            <a href="comments.html">Comentários</a>
+            <a href="todos.html">Tarefas</a>
+            <a href="albums.html">Álbuns</a>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="searchUser" placeholder="Buscar usuário por nome...">
+        </div>
+
+        <div id="usersContainer">
+            <div class="loading">Carregando usuários...</div>
+        </div>
+    </div>
+
+    <script>
+        const usersContainer = document.getElementById('usersContainer');
+        const searchInput = document.getElementById('searchUser');
+        let allUsers = [];
+
+        async function loadUsers() {
+            try {
+                const response = await fetch('http://localhost:3000/users');
+                if (!response.ok) throw new Error('Erro ao carregar usuários');
+                
+                allUsers = await response.json();
+                displayUsers(allUsers);
+            } catch (error) {
+                usersContainer.innerHTML = `<div class="loading">Erro: ${error.message}</div>`;
+            }
+        }
+
+        function displayUsers(users) {
+            if (users.length === 0) {
+                usersContainer.innerHTML = '<p class="loading">Nenhum usuário encontrado.</p>';
+                return;
+            }
+
+            usersContainer.innerHTML = users.map(user => `
+                <div class="user-item">
+                    <div class="user-name">${user.name}</div>
+                    <div class="user-email">📧 ${user.email}</div>
+                    <div class="user-username">👤 ${user.username}</div>
+                    <div class="user-username">🏙️ ${user.address?.city || 'N/A'}</div>
+                </div>
+            `).join('');
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = allUsers.filter(user => 
+                user.name.toLowerCase().includes(searchTerm) ||
+                user.email.toLowerCase().includes(searchTerm)
+            );
+            displayUsers(filtered);
+        });
+
+        loadUsers();
+    </script>
+</body>
+</html>
