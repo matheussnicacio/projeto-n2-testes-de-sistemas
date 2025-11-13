@@ -3,159 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Users - JSONPlaceholder Test</title>
+    <title>Usuários - N3 Project</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .back-button {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .back-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 30px;
         }
-        h1 {
-            color: #667eea;
-            margin-bottom: 30px;
-            text-align: center;
-            font-size: 2.5em;
-        }
-        .nav {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-        .nav a {
-            padding: 10px 20px;
-            background: #667eea;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-        .nav a:hover {
-            background: #764ba2;
-            transform: translateY(-2px);
-        }
-        .search-box {
-            margin-bottom: 20px;
-        }
-        #searchUser {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-        #usersContainer {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        .user-item {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #667eea;
-            transition: all 0.3s;
-        }
-        .user-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        .user-name {
-            color: #333;
-            font-size: 1.3em;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-        .user-email {
-            color: #666;
-            margin-bottom: 5px;
-        }
-        .user-username {
-            color: #999;
-            font-size: 0.9em;
-        }
+
         .loading {
             text-align: center;
-            padding: 40px;
+            color: white;
+            font-size: 1.5em;
+            padding: 50px;
+        }
+
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            animation: fadeIn 1s;
+        }
+
+        .user-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .user-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .user-avatar {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            color: white;
+            margin: 0 auto 20px;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .user-name {
+            color: #333;
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .user-username {
             color: #667eea;
+            font-size: 1em;
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .user-info {
+            border-top: 2px solid #f0f0f0;
+            padding-top: 20px;
+        }
+
+        .user-info-item {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .user-info-item:hover {
+            background: #f8f9fa;
+        }
+
+        .info-icon {
             font-size: 1.2em;
+            margin-right: 12px;
+            min-width: 25px;
+        }
+
+        .info-content {
+            flex: 1;
+        }
+
+        .info-label {
+            color: #999;
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+
+        .info-value {
+            color: #333;
+            font-size: 0.95em;
+            word-break: break-word;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .users-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Lista de Usuários</h1>
-        
-        <div class="nav">
-            <a href="index.html">Home</a>
-            <a href="posts.html">Posts</a>
-            <a href="comments.html">Comentários</a>
-            <a href="todos.html">Tarefas</a>
-            <a href="albums.html">Álbuns</a>
+        <div class="header">
+            <a href="index.html" class="back-button">← Voltar</a>
+            <h1>👥 Usuários</h1>
+            <p>Todos os usuários cadastrados</p>
         </div>
 
-        <div class="search-box">
-            <input type="text" id="searchUser" placeholder="Buscar usuário por nome...">
-        </div>
-
-        <div id="usersContainer">
-            <div class="loading">Carregando usuários...</div>
-        </div>
+        <div id="loading" class="loading">Carregando usuários...</div>
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="usersContainer" class="users-grid"></div>
     </div>
 
     <script>
-        const usersContainer = document.getElementById('usersContainer');
-        const searchInput = document.getElementById('searchUser');
-        let allUsers = [];
+        const BASE_URL = 'http://localhost:3000';
 
         async function loadUsers() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const container = document.getElementById('usersContainer');
+
             try {
-                const response = await fetch('http://localhost:3000/users');
-                if (!response.ok) throw new Error('Erro ao carregar usuários');
+                const response = await fetch(`${BASE_URL}/users`);
                 
-                allUsers = await response.json();
-                displayUsers(allUsers);
-            } catch (error) {
-                usersContainer.innerHTML = `<div class="loading">Erro: ${error.message}</div>`;
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const users = await response.json();
+                loading.style.display = 'none';
+
+                if (!Array.isArray(users) || users.length === 0) {
+                    error.textContent = 'Nenhum usuário encontrado.';
+                    error.style.display = 'block';
+                    return;
+                }
+
+                users.forEach(user => {
+                    const userCard = document.createElement('div');
+                    userCard.className = 'user-card';
+                    userCard.innerHTML = `
+                        <div class="user-avatar">👤</div>
+                        <div class="user-name">${user.name}</div>
+                        <div class="user-username">@${user.username}</div>
+                        <div class="user-info">
+                            <div class="user-info-item">
+                                <span class="info-icon">📧</span>
+                                <div class="info-content">
+                                    <div class="info-label">Email</div>
+                                    <div class="info-value">${user.email}</div>
+                                </div>
+                            </div>
+                            <div class="user-info-item">
+                                <span class="info-icon">📞</span>
+                                <div class="info-content">
+                                    <div class="info-label">Telefone</div>
+                                    <div class="info-value">${user.phone}</div>
+                                </div>
+                            </div>
+                            <div class="user-info-item">
+                                <span class="info-icon">🌐</span>
+                                <div class="info-content">
+                                    <div class="info-label">Website</div>
+                                    <div class="info-value">${user.website}</div>
+                                </div>
+                            </div>
+                            <div class="user-info-item">
+                                <span class="info-icon">🏢</span>
+                                <div class="info-content">
+                                    <div class="info-label">Empresa</div>
+                                    <div class="info-value">${user.company?.name || 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div class="user-info-item">
+                                <span class="info-icon">📍</span>
+                                <div class="info-content">
+                                    <div class="info-label">Cidade</div>
+                                    <div class="info-value">${user.address?.city || 'N/A'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(userCard);
+                });
+
+            } catch (err) {
+                loading.style.display = 'none';
+                error.textContent = `Erro ao carregar usuários: ${err.message}`;
+                error.style.display = 'block';
+                console.error('Erro:', err);
             }
         }
 
-        function displayUsers(users) {
-            if (users.length === 0) {
-                usersContainer.innerHTML = '<p class="loading">Nenhum usuário encontrado.</p>';
-                return;
-            }
-
-            usersContainer.innerHTML = users.map(user => `
-                <div class="user-item">
-                    <div class="user-name">${user.name}</div>
-                    <div class="user-email">📧 ${user.email}</div>
-                    <div class="user-username">👤 ${user.username}</div>
-                    <div class="user-username">🏙️ ${user.address?.city || 'N/A'}</div>
-                </div>
-            `).join('');
-        }
-
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            const filtered = allUsers.filter(user => 
-                user.name.toLowerCase().includes(searchTerm) ||
-                user.email.toLowerCase().includes(searchTerm)
-            );
-            displayUsers(filtered);
-        });
-
-        loadUsers();
+        window.addEventListener('DOMContentLoaded', loadUsers);
     </script>
 </body>
 </html>

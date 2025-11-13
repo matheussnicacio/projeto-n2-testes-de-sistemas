@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Álbuns - N3 Project</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .back-button {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .back-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.5em;
+            padding: 50px;
+        }
+
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 35px;
+            animation: fadeIn 0.8s;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 25px;
+            border-radius: 18px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .stat-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            color: #667eea;
+            font-size: 2.3em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .view-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .view-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .view-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .albums-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            animation: fadeIn 1s;
+        }
+
+        .albums-grid.list-view {
+            grid-template-columns: 1fr;
+        }
+
+        .album-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .album-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .album-cover {
+            width: 100%;
+            height: 220px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4.5em;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .album-cover::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .album-id-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.25em;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
+
+        .album-content {
+            padding: 25px;
+        }
+
+        .album-title {
+            color: #333;
+            font-size: 1.15em;
+            font-weight: bold;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            min-height: 60px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .album-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 15px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .album-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #667eea;
+            font-size: 0.95em;
+            font-weight: bold;
+        }
+
+        .album-user-icon {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1em;
+        }
+
+        /* List View */
+        .albums-grid.list-view .album-card {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .albums-grid.list-view .album-cover {
+            width: 200px;
+            height: auto;
+            min-height: 150px;
+        }
+
+        .albums-grid.list-view .album-content {
+            flex: 1;
+        }
+
+        .albums-grid.list-view .album-title {
+            min-height: auto;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .albums-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+
+            .albums-grid.list-view .album-card {
+                flex-direction: column;
+            }
+
+            .albums-grid.list-view .album-cover {
+                width: 100%;
+                height: 180px;
+            }
+
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="index.html" class="back-button">← Voltar</a>
+            <h1>📸 Álbuns</h1>
+            <p>Coleção completa de álbuns fotográficos</p>
+        </div>
+
+        <div id="loading" class="loading">Carregando álbuns...</div>
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <div id="statsRow" class="stats-row" style="display: none;"></div>
+
+        <div id="viewToggle" class="view-toggle" style="display: none;">
+            <button class="view-btn active" data-view="grid">
+                <span>🔲</span> Grade
+            </button>
+            <button class="view-btn" data-view="list">
+                <span>📋</span> Lista
+            </button>
+        </div>
+
+        <div id="albumsContainer" class="albums-grid"></div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:3000';
+        let allAlbums = [];
+        let currentView = 'grid';
+
+        async function loadAlbums() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const container = document.getElementById('albumsContainer');
+            const statsRow = document.getElementById('statsRow');
+            const viewToggle = document.getElementById('viewToggle');
+
+            try {
+                const response = await fetch(`${BASE_URL}/albums`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const albums = await response.json();
+                loading.style.display = 'none';
+
+                if (!Array.isArray(albums) || albums.length === 0) {
+                    error.textContent = 'Nenhum álbum encontrado.';
+                    error.style.display = 'block';
+                    return;
+                }
+
+                allAlbums = albums;
+
+                // Calcular estatísticas
+                const uniqueUsers = [...new Set(albums.map(a => a.userId))].length;
+                const avgPerUser = (albums.length / uniqueUsers).toFixed(1);
+
+                // Mostrar estatísticas
+                statsRow.style.display = 'grid';
+                statsRow.innerHTML = `
+                    <div class="stat-box">
+                        <div class="stat-icon">📚</div>
+                        <div class="stat-number">${albums.length}</div>
+                        <div class="stat-label">Total de Álbuns</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-number">${uniqueUsers}</div>
+                        <div class="stat-label">Usuários</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-number">${avgPerUser}</div>
+                        <div class="stat-label">Média por Usuário</div>
+                    </div>
+                `;
+
+                viewToggle.style.display = 'flex';
+                renderAlbums();
+
+            } catch (err) {
+                loading.style.display = 'none';
+                error.textContent = `Erro ao carregar álbuns: ${err.message}`;
+                error.style.display = 'block';
+                console.error('Erro:', err);
+            }
+        }
+
+        function renderAlbums() {
+            const container = document.getElementById('albumsContainer');
+            container.innerHTML = '';
+            container.className = `albums-grid ${currentView === 'list' ? 'list-view' : ''}`;
+
+            allAlbums.forEach(album => {
+                const albumCard = document.createElement('div');
+                albumCard.className = 'album-card';
+                albumCard.innerHTML = `
+                    <div class="album-cover">
+                        <div class="album-id-badge">#${album.id}</div>
+                        📸
+                    </div>
+                    <div class="album-content">
+                        <div class="album-title">${album.title}</div>
+                        <div class="album-footer">
+                            <div class="album-user">
+                                <div class="album-user-icon">👤</div>
+                                <span>Usuário #${album.userId}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(albumCard);
+            });
+        }
+
+        // Toggle de visualização
+        document.getElementById('viewToggle').addEventListener('click', (e) => {
+            const btn = e.target.closest('.view-btn');
+            if (btn) {
+                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentView = btn.dataset.view;
+                renderAlbums();
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', loadAlbums);
+    </script>
+</body>
+</html>

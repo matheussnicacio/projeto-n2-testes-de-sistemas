@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarefas - N3 Project</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .back-button {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .back-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.5em;
+            padding: 50px;
+        }
+
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 35px;
+            animation: fadeIn 0.8s;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .stat-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card h3 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .todos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 18px;
+            animation: fadeIn 1s;
+        }
+
+        .todo-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s;
+            display: flex;
+            align-items: start;
+            gap: 15px;
+            border-left: 4px solid transparent;
+        }
+
+        .todo-card.completed {
+            border-left-color: #4caf50;
+        }
+
+        .todo-card.pending {
+            border-left-color: #ff9800;
+        }
+
+        .todo-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .todo-checkbox {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            flex-shrink: 0;
+            margin-top: 2px;
+            transition: all 0.3s;
+        }
+
+        .todo-checkbox.completed {
+            background: #4caf50;
+            color: white;
+            box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
+        }
+
+        .todo-checkbox.pending {
+            background: #fff3e0;
+            color: #ff9800;
+            border: 2px solid #ff9800;
+        }
+
+        .todo-content {
+            flex: 1;
+        }
+
+        .todo-title {
+            color: #333;
+            font-size: 1.05em;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .todo-title.completed {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .todo-meta {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-size: 0.85em;
+            flex-wrap: wrap;
+        }
+
+        .todo-user {
+            color: #667eea;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .todo-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .todo-status.completed {
+            background: #e8f5e9;
+            color: #4caf50;
+        }
+
+        .todo-status.pending {
+            background: #fff3e0;
+            color: #ff9800;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .todos-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="index.html" class="back-button">← Voltar</a>
+            <h1>✅ Tarefas</h1>
+            <p>Gerenciamento de tarefas do projeto</p>
+        </div>
+
+        <div id="loading" class="loading">Carregando tarefas...</div>
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <div id="stats" class="stats" style="display: none;"></div>
+        
+        <div id="filterButtons" class="filter-buttons" style="display: none;">
+            <button class="filter-btn active" data-filter="all">📋 Todas</button>
+            <button class="filter-btn" data-filter="completed">✅ Concluídas</button>
+            <button class="filter-btn" data-filter="pending">⏳ Pendentes</button>
+        </div>
+
+        <div id="todosContainer" class="todos-grid"></div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:3000';
+        let allTodos = [];
+        let currentFilter = 'all';
+
+        async function loadTodos() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const container = document.getElementById('todosContainer');
+            const statsDiv = document.getElementById('stats');
+            const filterButtons = document.getElementById('filterButtons');
+
+            try {
+                const response = await fetch(`${BASE_URL}/todos`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const todos = await response.json();
+                loading.style.display = 'none';
+
+                if (!Array.isArray(todos) || todos.length === 0) {
+                    error.textContent = 'Nenhuma tarefa encontrada.';
+                    error.style.display = 'block';
+                    return;
+                }
+
+                allTodos = todos;
+
+                // Estatísticas
+                const completed = todos.filter(t => t.completed).length;
+                const pending = todos.length - completed;
+                const completionRate = ((completed / todos.length) * 100).toFixed(1);
+
+                statsDiv.style.display = 'grid';
+                statsDiv.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <h3>${todos.length}</h3>
+                        <p>Total de Tarefas</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <h3>${completed}</h3>
+                        <p>Concluídas</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏳</div>
+                        <h3>${pending}</h3>
+                        <p>Pendentes</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <h3>${completionRate}%</h3>
+                        <p>Taxa de Conclusão</p>
+                    </div>
+                `;
+
+                filterButtons.style.display = 'flex';
+                renderTodos();
+
+            } catch (err) {
+                loading.style.display = 'none';
+                error.textContent = `Erro ao carregar tarefas: ${err.message}`;
+                error.style.display = 'block';
+                console.error('Erro:', err);
+            }
+        }
+
+        function renderTodos() {
+            const container = document.getElementById('todosContainer');
+            container.innerHTML = '';
+
+            let filteredTodos = allTodos;
+            if (currentFilter === 'completed') {
+                filteredTodos = allTodos.filter(t => t.completed);
+            } else if (currentFilter === 'pending') {
+                filteredTodos = allTodos.filter(t => !t.completed);
+            }
+
+            filteredTodos.forEach(todo => {
+                const todoCard = document.createElement('div');
+                const statusClass = todo.completed ? 'completed' : 'pending';
+                const statusText = todo.completed ? 'Concluída' : 'Pendente';
+                const icon = todo.completed ? '✓' : '○';
+                
+                todoCard.className = `todo-card ${statusClass}`;
+                todoCard.innerHTML = `
+                    <div class="todo-checkbox ${statusClass}">${icon}</div>
+                    <div class="todo-content">
+                        <div class="todo-title ${statusClass}">${todo.title}</div>
+                        <div class="todo-meta">
+                            <span class="todo-user">👤 Usuário #${todo.userId}</span>
+                            <span class="todo-status ${statusClass}">${statusText}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(todoCard);
+            });
+
+            if (filteredTodos.length === 0) {
+                container.innerHTML = '<p style="color: white; text-align: center; grid-column: 1/-1; padding: 40px;">Nenhuma tarefa encontrada com este filtro.</p>';
+            }
+        }
+
+        // Filtros
+        document.getElementById('filterButtons').addEventListener('click', (e) => {
+            if (e.target.classList.contains('filter-btn')) {
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                currentFilter = e.target.dataset.filter;
+                renderTodos();
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', loadTodos);
+    </script>
+</body>
+</html>
