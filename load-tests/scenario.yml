@@ -1,22 +1,22 @@
 config:
   target: "http://localhost:3000"
   phases:
-    # Fase 1: Aquecimento - 20 usuários por 30 segundos (Nota 6)
+    # Fase 1: Aquecimento
     - duration: 30
       arrivalRate: 20
       name: "Warmup - 20 users"
     
-    # Fase 2: Carga média - 50 usuários por 60 segundos (Nota 8)
+    # Fase 2: Carga média 
     - duration: 60
       arrivalRate: 50
       name: "Medium load - 50 users"
     
-    # Fase 3: Carga alta - 100 usuários por 90 segundos (Nota 9)
+    # Fase 3: Carga alta 
     - duration: 90
       arrivalRate: 100
       name: "High load - 100 users"
     
-    # Fase 4: Pico de carga - 150 usuários por 30 segundos (Nota 10)
+    # Fase 4: Pico de carga
     - duration: 30
       arrivalRate: 150
       name: "Peak load - 150 users"
