@@ -1,0 +1,181 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    # Fase 1: Aquecimento - 20 usuários por 30 segundos (Nota 6)
+    - duration: 30
+      arrivalRate: 20
+      name: "Warmup - 20 users"
+    
+    # Fase 2: Carga média - 50 usuários por 60 segundos (Nota 8)
+    - duration: 60
+      arrivalRate: 50
+      name: "Medium load - 50 users"
+    
+    # Fase 3: Carga alta - 100 usuários por 90 segundos (Nota 9)
+    - duration: 90
+      arrivalRate: 100
+      name: "High load - 100 users"
+    
+    # Fase 4: Pico de carga - 150 usuários por 30 segundos (Nota 10)
+    - duration: 30
+      arrivalRate: 150
+      name: "Peak load - 150 users"
+  
+  # Plugins para relatórios
+  plugins:
+    expect: {}
+  
+  # Configurações de timeout e pool
+  http:
+    timeout: 10
+    pool: 100
+
+scenarios:
+  # Cenário 1: Navegação básica em Posts
+  - name: "Navigate Posts"
+    weight: 30
+    flow:
+      - get:
+          url: "/posts"
+          expect:
+            - statusCode: 200
+            - contentType: json
+            - hasProperty: length
+
+  # Cenário 2: Navegação em Users
+  - name: "Navigate Users"
+    weight: 25
+    flow:
+      - get:
+          url: "/users"
+          expect:
+            - statusCode: 200
+            - contentType: json
+
+  # Cenário 3: Navegação em Comments
+  - name: "Navigate Comments"
+    weight: 20
+    flow:
+      - get:
+          url: "/comments"
+          expect:
+            - statusCode: 200
+            - contentType: json
+
+  # Cenário 4: Navegação em Todos
+  - name: "Navigate Todos"
+    weight: 15
+    flow:
+      - get:
+          url: "/todos"
+          expect:
+            - statusCode: 200
+            - contentType: json
+
+  # Cenário 5: Navegação em Albums
+  - name: "Navigate Albums"
+    weight: 10
+    flow:
+      - get:
+          url: "/albums"
+          expect:
+            - statusCode: 200
+            - contentType: json
+
+  # Cenário 6: Teste de endpoints específicos
+  - name: "Specific Resource Tests"
+    weight: 20
+    flow:
+      # Buscar post específico
+      - get:
+          url: "/posts/1"
+          expect:
+            - statusCode: 200
+            - contentType: json
+            - hasProperty: id
+            - hasProperty: title
+      
+      # Buscar usuário específico
+      - get:
+          url: "/users/1"
+          expect:
+            - statusCode: 200
+            - contentType: json
+      
+      # Buscar comentários de um post
+      - get:
+          url: "/posts/1/comments"
+          expect:
+            - statusCode: 200
+            - contentType: json
+
+  # Cenário 7: Teste de erro (endpoint inexistente)
+  - name: "Error Handling Test"
+    weight: 5
+    flow:
+      - get:
+          url: "/nonexistent"
+          expect:
+            - statusCode: 404
+
+  # Cenário 8: Navegação completa (simula usuário real)
+  - name: "Full User Journey"
+    weight: 25
+    flow:
+      # Página inicial (simulando acesso ao index.html)
+      - get:
+          url: "/posts"
+          expect:
+            - statusCode: 200
+      
+      # Aguarda 1 segundo (simula leitura)
+      - think: 1
+      
+      # Navega para users
+      - get:
+          url: "/users"
+          expect:
+            - statusCode: 200
+      
+      # Aguarda 1 segundo
+      - think: 1
+      
+      # Navega para comments
+      - get:
+          url: "/comments"
+          expect:
+            - statusCode: 200
+      
+      # Aguarda 1 segundo
+      - think: 1
+      
+      # Navega para todos
+      - get:
+          url: "/todos"
+          expect:
+            - statusCode: 200
+      
+      # Aguarda 1 segundo
+      - think: 1
+      
+      # Navega para albums
+      - get:
+          url: "/albums"
+          expect:
+            - statusCode: 200
+
+  # Cenário 9: Teste de performance em endpoints pesados
+  - name: "Heavy Endpoints Test"
+    weight: 15
+    flow:
+      # Comments geralmente tem muitos dados
+      - get:
+          url: "/comments"
+          expect:
+            - statusCode: 200
+      
+      # Todos também
+      - get:
+          url: "/todos"
+          expect:
+            - statusCode: 200
