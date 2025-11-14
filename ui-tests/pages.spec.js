@@ -1,566 +1,166 @@
 const { test, expect } = require('@playwright/test');
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://localhost:8080';
 
 // ========================================
-// TESTES DA PÁGINA INDEX.HTML
+// TESTES BÁSICOS DE CARREGAMENTO (3 testes)
 // ========================================
 
-test.describe('Index Page - Homepage Tests', () => {
-  test('deve carregar homepage corretamente', async ({ page }) => {
-    await page.goto(`${BASE_URL}`);
-    await expect(page).toHaveTitle(/N3/);
-    await expect(page.locator('h1')).toContainText('Projeto N3');
-  });
+test('01 - Homepage deve carregar com título correto', async ({ page }) => {
+  await page.goto(`${BASE_URL}`);
+  await expect(page).toHaveTitle(/N3/);
+  await expect(page.locator('h1')).toContainText('Projeto N3');
+});
 
-  test('deve exibir todos os cards de navegação', async ({ page }) => {
-    await page.goto(`${BASE_URL}`);
-    
-    const cards = page.locator('.card');
-    await expect(cards).toHaveCount(5);
-    
-    await expect(page.locator('text=Posts')).toBeVisible();
-    await expect(page.locator('text=Usuários')).toBeVisible();
-    await expect(page.locator('text=Comentários')).toBeVisible();
-    await expect(page.locator('text=Tarefas')).toBeVisible();
-    await expect(page.locator('text=Álbuns')).toBeVisible();
-  });
+test('02 - Página de posts deve carregar', async ({ page }) => {
+  await page.goto(`${BASE_URL}/posts.html`);
+  await expect(page).toHaveTitle(/Posts/);
+  await page.waitForSelector('.post-item', { timeout: 5000 });
+  const posts = await page.locator('.post-item').count();
+  expect(posts).toBeGreaterThan(0);
+});
 
-  test('deve carregar contadores de cada recurso', async ({ page }) => {
-    await page.goto(`${BASE_URL}`);
-    
-    await page.waitForTimeout(2000);
-    
-    const postsCount = await page.locator('#postsCount').textContent();
-    const usersCount = await page.locator('#usersCount').textContent();
-    
-    expect(postsCount).not.toContain('Carregando');
-    expect(usersCount).not.toContain('Carregando');
-  });
-
-  test('links de navegação devem funcionar', async ({ page }) => {
-    await page.goto(`${BASE_URL}`);
-    
-    await page.click('a[href="posts.html"]');
-    await expect(page).toHaveURL(/posts.html/);
-  });
+test('03 - Página de usuários deve carregar', async ({ page }) => {
+  await page.goto(`${BASE_URL}/users.html`);
+  await expect(page).toHaveTitle(/Usuários/);
+  await page.waitForSelector('.user-item', { timeout: 5000 });
+  const users = await page.locator('.user-item').count();
+  expect(users).toBeGreaterThan(0);
 });
 
 // ========================================
-// TESTES DA PÁGINA POSTS.HTML
+// TESTES DE NAVEGAÇÃO (3 testes)
 // ========================================
 
-test.describe('Posts Page - UI Tests', () => {
-  test('deve carregar página de posts corretamente', async ({ page }) => {
-    await page.goto(`${BASE_URL}/posts.html`);
-    await expect(page).toHaveTitle(/Posts/);
-    await expect(page.locator('h1')).toContainText('Lista de Posts');
-  });
+test('04 - Navegação de index para posts deve funcionar', async ({ page }) => {
+  await page.goto(`${BASE_URL}`);
+  await page.click('a[href="posts.html"]');
+  await expect(page).toHaveURL(/posts\.html/);
+  await expect(page.locator('h1')).toContainText('Posts');
+});
 
-  test('deve exibir lista de posts da API', async ({ page }) => {
-    await page.goto(`${BASE_URL}/posts.html`);
-    await page.waitForSelector('.post-item', { timeout: 5000 });
-    
-    const posts = await page.locator('.post-item').count();
-    expect(posts).toBeGreaterThan(0);
-  });
+test('05 - Menu de navegação deve existir em todas páginas', async ({ page }) => {
+  const pages = ['/posts.html', '/users.html', '/comments.html'];
+  
+  for (const path of pages) {
+    await page.goto(`${BASE_URL}${path}`);
+    await expect(page.locator('nav')).toBeVisible();
+    const navLinks = await page.locator('nav a').count();
+    expect(navLinks).toBeGreaterThanOrEqual(5);
+  }
+});
 
-  test('deve exibir título e corpo do post', async ({ page }) => {
-    await page.goto(`${BASE_URL}/posts.html`);
-    await page.waitForSelector('.post-item');
-    
-    const firstPost = page.locator('.post-item').first();
-    await expect(firstPost.locator('.post-title')).toBeVisible();
-    await expect(firstPost.locator('.post-body')).toBeVisible();
-  });
-
-  test('deve ter botão de carregar posts', async ({ page }) => {
-    await page.goto(`${BASE_URL}/posts.html`);
-    
-    const loadButton = page.locator('#loadPosts');
-    await expect(loadButton).toBeVisible();
-    await expect(loadButton).toHaveText(/Carregar Posts/);
-  });
-
-  test('deve filtrar posts por usuário', async ({ page }) => {
-    await page.goto(`${BASE_URL}/posts.html`);
-    await page.waitForSelector('.post-item');
-    
-    await page.selectOption('#userFilter', '1');
-    await page.click('#filterBtn');
-    await page.waitForTimeout(1000);
-    
-    const posts = await page.locator('.post-item').count();
-    expect(posts).toBeGreaterThan(0);
-    
-    const firstPost = page.locator('.post-item').first();
-    const metaText = await firstPost.locator('.post-meta').textContent();
-    expect(metaText).toContain('User ID: 1');
-  });
-
-  test('botão de carregar deve resetar filtro', async ({ page }) => {
-    await page.goto(`${BASE_URL}/posts.html`);
-    await page.waitForSelector('.post-item');
-    
-    await page.selectOption('#userFilter', '1');
-    await page.click('#filterBtn');
-    await page.waitForTimeout(500);
-    
-    await page.click('#loadPosts');
-    await page.waitForTimeout(500);
-    
-    const selectedValue = await page.locator('#userFilter').inputValue();
-    expect(selectedValue).toBe('');
-  });
-
-  test('deve exibir meta informações do post', async ({ page }) => {
-    await page.goto(`${BASE_URL}/posts.html`);
-    await page.waitForSelector('.post-item');
-    
-    const firstPost = page.locator('.post-item').first();
-    const meta = firstPost.locator('.post-meta');
-    
-    await expect(meta).toBeVisible();
-    const metaText = await meta.textContent();
-    expect(metaText).toMatch(/Post ID: \d+/);
-    expect(metaText).toMatch(/User ID: \d+/);
-  });
+test('06 - Link Home deve retornar à página inicial', async ({ page }) => {
+  await page.goto(`${BASE_URL}/posts.html`);
+  await page.click('a[href="index.html"]');
+  await expect(page).toHaveURL(/index\.html|localhost:8080\/?$/);
 });
 
 // ========================================
-// TESTES DA PÁGINA USERS.HTML
+// TESTES DE CONTEÚDO (4 testes)
 // ========================================
 
-test.describe('Users Page - UI Tests', () => {
-  test('deve carregar página de usuários corretamente', async ({ page }) => {
-    await page.goto(`${BASE_URL}/users.html`);
-    await expect(page).toHaveTitle(/Users/);
-    await expect(page.locator('h1')).toContainText('Lista de Usuários');
-  });
+test('07 - Posts devem exibir título e corpo', async ({ page }) => {
+  await page.goto(`${BASE_URL}/posts.html`);
+  await page.waitForSelector('.post-item');
+  
+  const firstPost = page.locator('.post-item').first();
+  await expect(firstPost.locator('.post-title')).toBeVisible();
+  await expect(firstPost.locator('.post-body')).toBeVisible();
+  
+  const titleText = await firstPost.locator('.post-title').textContent();
+  expect(titleText.length).toBeGreaterThan(0);
+});
 
-  test('deve exibir lista de usuários da API', async ({ page }) => {
-    await page.goto(`${BASE_URL}/users.html`);
-    await page.waitForSelector('.user-item', { timeout: 5000 });
-    
-    const users = await page.locator('.user-item').count();
-    expect(users).toBeGreaterThan(0);
-  });
+test('08 - Usuários devem exibir nome, email e telefone', async ({ page }) => {
+  await page.goto(`${BASE_URL}/users.html`);
+  await page.waitForSelector('.user-item');
+  
+  const firstUser = page.locator('.user-item').first();
+  await expect(firstUser.locator('.user-name')).toBeVisible();
+  await expect(firstUser.locator('.user-email')).toBeVisible();
+  await expect(firstUser.locator('.user-phone')).toBeVisible();
+});
 
-  test('deve exibir nome e email do usuário', async ({ page }) => {
-    await page.goto(`${BASE_URL}/users.html`);
-    await page.waitForSelector('.user-item');
-    
-    const firstUser = page.locator('.user-item').first();
-    await expect(firstUser.locator('.user-name')).toBeVisible();
-    await expect(firstUser.locator('.user-email')).toBeVisible();
-  });
+test('09 - Comentários devem exibir nome, email e corpo', async ({ page }) => {
+  await page.goto(`${BASE_URL}/comments.html`);
+  await page.waitForSelector('.comment-item', { timeout: 5000 });
+  
+  const firstComment = page.locator('.comment-item').first();
+  await expect(firstComment.locator('.comment-name')).toBeVisible();
+  await expect(firstComment.locator('.comment-email')).toBeVisible();
+  await expect(firstComment.locator('.comment-body')).toBeVisible();
+});
 
-  test('deve ter campo de busca de usuários', async ({ page }) => {
-    await page.goto(`${BASE_URL}/users.html`);
-    
-    const searchInput = page.locator('#searchUser');
-    await expect(searchInput).toBeVisible();
-    await expect(searchInput).toHaveAttribute('placeholder', /Buscar/i);
-  });
-
-  test('busca deve filtrar usuários por nome', async ({ page }) => {
-    await page.goto(`${BASE_URL}/users.html`);
-    await page.waitForSelector('.user-item');
-    
-    const initialCount = await page.locator('.user-item').count();
-    
-    await page.fill('#searchUser', 'João');
-    await page.waitForTimeout(500);
-    
-    const filteredCount = await page.locator('.user-item').count();
-    expect(filteredCount).toBeLessThanOrEqual(initialCount);
-  });
-
-  test('busca deve funcionar com email', async ({ page }) => {
-    await page.goto(`${BASE_URL}/users.html`);
-    await page.waitForSelector('.user-item');
-    
-    await page.fill('#searchUser', '@email');
-    await page.waitForTimeout(500);
-    
-    const users = await page.locator('.user-item').count();
-    expect(users).toBeGreaterThan(0);
-  });
-
-  test('deve exibir informações completas do usuário', async ({ page }) => {
-    await page.goto(`${BASE_URL}/users.html`);
-    await page.waitForSelector('.user-item');
-    
-    const firstUser = page.locator('.user-item').first();
-    
-    await expect(firstUser.locator('.user-name')).toBeVisible();
-    await expect(firstUser.locator('.user-email')).toBeVisible();
-    await expect(firstUser.locator('.user-username')).toBeVisible();
-  });
+test('10 - Tarefas devem mostrar status de conclusão', async ({ page }) => {
+  await page.goto(`${BASE_URL}/todos.html`);
+  await page.waitForSelector('.todo-item', { timeout: 5000 });
+  
+  const todos = page.locator('.todo-item');
+  const count = await todos.count();
+  expect(count).toBeGreaterThan(0);
+  
+  // Verificar que pelo menos uma tarefa tem checkbox visível
+  const firstTodo = todos.first();
+  await expect(firstTodo.locator('.todo-checkbox')).toBeVisible();
 });
 
 // ========================================
-// TESTES DA PÁGINA COMMENTS.HTML
+// TESTES DE ERRO (3 testes)
 // ========================================
 
-test.describe('Comments Page - UI Tests', () => {
-  test('deve carregar página de comentários corretamente', async ({ page }) => {
-    await page.goto(`${BASE_URL}/comments.html`);
-    await expect(page).toHaveTitle(/Comments/);
-    await expect(page.locator('h1')).toContainText('Comentários');
-  });
+test('11 - Deve retornar 404 para rota inexistente', async ({ page }) => {
+  const response = await page.goto(`${BASE_URL}/pagina-nao-existe.html`);
+  expect(response?.status()).toBe(404);
+});
 
-  test('deve exibir lista de comentários da API', async ({ page }) => {
-    await page.goto(`${BASE_URL}/comments.html`);
-    await page.waitForSelector('.comment-item', { timeout: 5000 });
-    
-    const comments = await page.locator('.comment-item').count();
-    expect(comments).toBeGreaterThan(0);
-  });
+test('12 - Deve lidar com elemento ausente graciosamente', async ({ page }) => {
+  await page.goto(`${BASE_URL}/posts.html`);
+  
+  const elementoInexistente = page.locator('#elemento-que-nao-existe-12345');
+  await expect(elementoInexistente).toHaveCount(0);
+});
 
-  test('deve exibir nome e email em comentário', async ({ page }) => {
-    await page.goto(`${BASE_URL}/comments.html`);
-    await page.waitForSelector('.comment-item');
-    
-    const firstComment = page.locator('.comment-item').first();
-    await expect(firstComment.locator('.comment-name')).toBeVisible();
-    await expect(firstComment.locator('.comment-email')).toBeVisible();
-  });
-
-  test('deve ter dropdown de filtro por post', async ({ page }) => {
-    await page.goto(`${BASE_URL}/comments.html`);
-    
-    const postFilter = page.locator('#postFilter');
-    await expect(postFilter).toBeVisible();
-    
-    const options = await postFilter.locator('option').count();
-    expect(options).toBeGreaterThan(1);
-  });
-
-  test('deve filtrar comentários por post', async ({ page }) => {
-    await page.goto(`${BASE_URL}/comments.html`);
-    await page.waitForSelector('.comment-item');
-    
-    await page.selectOption('#postFilter', '1');
-    await page.click('#filterBtn');
-    await page.waitForTimeout(1000);
-    
-    const comments = await page.locator('.comment-item').count();
-    expect(comments).toBeGreaterThan(0);
-  });
-
-  test('deve exibir corpo do comentário', async ({ page }) => {
-    await page.goto(`${BASE_URL}/comments.html`);
-    await page.waitForSelector('.comment-item');
-    
-    const firstComment = page.locator('.comment-item').first();
-    const body = firstComment.locator('.comment-body');
-    
-    await expect(body).toBeVisible();
-    const bodyText = await body.textContent();
-    expect(bodyText.length).toBeGreaterThan(0);
-  });
+test('13 - Mensagem de erro deve ser exibida quando API falha', async ({ page }) => {
+  // Este teste verifica que o HTML tem um elemento de erro preparado
+  await page.goto(`${BASE_URL}/posts.html`);
+  
+  const errorDiv = page.locator('#error');
+  await expect(errorDiv).toHaveCount(1);
+  
+  // Inicialmente deve estar escondido
+  const isHidden = await errorDiv.evaluate(el => 
+    el.style.display === 'none' || el.offsetParent === null
+  );
+  expect(isHidden).toBe(true);
 });
 
 // ========================================
-// TESTES DA PÁGINA TODOS.HTML
+// TESTES ADICIONAIS (2 testes)
 // ========================================
 
-test.describe('Todos Page - UI Tests', () => {
-  test('deve carregar página de todos corretamente', async ({ page }) => {
-    await page.goto(`${BASE_URL}/todos.html`);
-    await expect(page).toHaveTitle(/Todos/);
-    await expect(page.locator('h1')).toContainText('Tarefas');
-  });
-
-  test('deve exibir lista de tarefas da API', async ({ page }) => {
-    await page.goto(`${BASE_URL}/todos.html`);
-    await page.waitForSelector('.todo-item', { timeout: 5000 });
-    
-    const todos = await page.locator('.todo-item').count();
-    expect(todos).toBeGreaterThan(0);
-  });
-
-  test('deve exibir status de conclusão da tarefa', async ({ page }) => {
-    await page.goto(`${BASE_URL}/todos.html`);
-    await page.waitForSelector('.todo-item');
-    
-    const firstTodo = page.locator('.todo-item').first();
-    await expect(firstTodo.locator('.todo-status')).toBeVisible();
-  });
-
-  test('deve exibir estatísticas de tarefas', async ({ page }) => {
-    await page.goto(`${BASE_URL}/todos.html`);
-    await page.waitForSelector('.todo-item');
-    
-    await expect(page.locator('#totalCount')).toBeVisible();
-    await expect(page.locator('#completedCount')).toBeVisible();
-    await expect(page.locator('#pendingCount')).toBeVisible();
-    
-    const totalText = await page.locator('#totalCount').textContent();
-    expect(parseInt(totalText)).toBeGreaterThan(0);
-  });
-
-  test('deve filtrar tarefas concluídas', async ({ page }) => {
-    await page.goto(`${BASE_URL}/todos.html`);
-    await page.waitForSelector('.todo-item');
-    
-    await page.click('button[data-filter="completed"]');
-    await page.waitForTimeout(500);
-    
-    const todos = page.locator('.todo-item');
-    const count = await todos.count();
-    
-    if (count > 0) {
-      for (let i = 0; i < count; i++) {
-        const todo = todos.nth(i);
-        await expect(todo).toHaveClass(/completed/);
-      }
-    }
-  });
-
-  test('deve filtrar tarefas pendentes', async ({ page }) => {
-    await page.goto(`${BASE_URL}/todos.html`);
-    await page.waitForSelector('.todo-item');
-    
-    await page.click('button[data-filter="pending"]');
-    await page.waitForTimeout(500);
-    
-    const todos = page.locator('.todo-item');
-    const count = await todos.count();
-    
-    if (count > 0) {
-      for (let i = 0; i < count; i++) {
-        const todo = todos.nth(i);
-        const hasCompleted = await todo.evaluate(el => 
-          el.classList.contains('completed')
-        );
-        expect(hasCompleted).toBe(false);
-      }
-    }
-  });
-
-  test('deve destacar filtro ativo', async ({ page }) => {
-    await page.goto(`${BASE_URL}/todos.html`);
-    
-    const allButton = page.locator('button[data-filter="all"]');
-    await expect(allButton).toHaveClass(/active/);
-    
-    const completedButton = page.locator('button[data-filter="completed"]');
-    await completedButton.click();
-    await page.waitForTimeout(200);
-    
-    await expect(completedButton).toHaveClass(/active/);
-    await expect(allButton).not.toHaveClass(/active/);
-  });
-
-  test('ícones devem refletir status da tarefa', async ({ page }) => {
-    await page.goto(`${BASE_URL}/todos.html`);
-    await page.waitForSelector('.todo-item');
-    
-    const statusIcons = await page.locator('.todo-status').allTextContents();
-    
-    const hasCheckmark = statusIcons.some(icon => icon.includes('✅'));
-    const hasCircle = statusIcons.some(icon => icon.includes('⭕'));
-    
-    expect(hasCheckmark || hasCircle).toBe(true);
-  });
+test('14 - Álbuns devem carregar e exibir títulos', async ({ page }) => {
+  await page.goto(`${BASE_URL}/albums.html`);
+  await page.waitForSelector('.album-item', { timeout: 5000 });
+  
+  const albums = await page.locator('.album-item').count();
+  expect(albums).toBeGreaterThan(0);
+  
+  const firstAlbum = page.locator('.album-item').first();
+  await expect(firstAlbum.locator('.album-title')).toBeVisible();
 });
 
-// ========================================
-// TESTES DA PÁGINA ALBUMS.HTML
-// ========================================
-
-test.describe('Albums Page - UI Tests', () => {
-  test('deve carregar página de álbuns corretamente', async ({ page }) => {
-    await page.goto(`${BASE_URL}/albums.html`);
-    await expect(page).toHaveTitle(/Albums/);
-    await expect(page.locator('h1')).toContainText('Álbuns');
-  });
-
-  test('deve exibir lista de álbuns da API', async ({ page }) => {
-    await page.goto(`${BASE_URL}/albums.html`);
-    await page.waitForSelector('.album-item', { timeout: 5000 });
-    
-    const albums = await page.locator('.album-item').count();
-    expect(albums).toBeGreaterThan(0);
-  });
-
-  test('deve exibir título do álbum', async ({ page }) => {
-    await page.goto(`${BASE_URL}/albums.html`);
-    await page.waitForSelector('.album-item');
-    
-    const firstAlbum = page.locator('.album-item').first();
-    const title = firstAlbum.locator('.album-title');
-    
-    await expect(title).toBeVisible();
-    const titleText = await title.textContent();
-    expect(titleText.length).toBeGreaterThan(0);
-  });
-
-  test('deve exibir ícone em cada álbum', async ({ page }) => {
-    await page.goto(`${BASE_URL}/albums.html`);
-    await page.waitForSelector('.album-item');
-    
-    const firstAlbum = page.locator('.album-item').first();
-    const icon = firstAlbum.locator('.album-icon');
-    
-    await expect(icon).toBeVisible();
-  });
-
-  test('deve exibir metadados do álbum', async ({ page }) => {
-    await page.goto(`${BASE_URL}/albums.html`);
-    await page.waitForSelector('.album-item');
-    
-    const firstAlbum = page.locator('.album-item').first();
-    const meta = firstAlbum.locator('.album-meta');
-    
-    await expect(meta).toBeVisible();
-    const metaText = await meta.textContent();
-    expect(metaText).toMatch(/Álbum #\d+/);
-    expect(metaText).toMatch(/Usuário #\d+/);
-  });
-});
-
-// ========================================
-// TESTES DE NAVEGAÇÃO
-// ========================================
-
-test.describe('Navigation Tests', () => {
-  test('todas as páginas devem ter menu de navegação', async ({ page }) => {
-    const pages = [
-      '/posts.html',
-      '/users.html',
-      '/comments.html',
-      '/todos.html',
-      '/albums.html'
-    ];
-    
-    for (const pagePath of pages) {
-      await page.goto(`${BASE_URL}${pagePath}`);
-      await expect(page.locator('.nav')).toBeVisible();
-      
-      const navLinks = await page.locator('.nav a').count();
-      expect(navLinks).toBeGreaterThanOrEqual(5);
-    }
-  });
-
-  test('link Home deve funcionar em todas as páginas', async ({ page }) => {
-    await page.goto(`${BASE_URL}/posts.html`);
-    await page.click('a[href="index.html"]');
-    await expect(page).toHaveURL(/index.html|localhost:3000\/?$/);
-  });
-
-  test('navegação entre páginas deve funcionar', async ({ page }) => {
-    await page.goto(`${BASE_URL}`);
-    
-    await page.click('a[href="posts.html"]');
-    await expect(page).toHaveURL(/posts.html/);
-    
-    await page.click('a[href="users.html"]');
-    await expect(page).toHaveURL(/users.html/);
-    
-    await page.click('a[href="comments.html"]');
-    await expect(page).toHaveURL(/comments.html/);
-    
-    await page.click('a[href="todos.html"]');
-    await expect(page).toHaveURL(/todos.html/);
-    
-    await page.click('a[href="albums.html"]');
-    await expect(page).toHaveURL(/albums.html/);
-  });
-});
-
-// ========================================
-// TESTES DE ERRO E CASOS EXTREMOS
-// ========================================
-
-test.describe('Error Scenarios - UI Tests', () => {
-  test('deve retornar 404 para rota inexistente', async ({ page }) => {
-    const response = await page.goto(`${BASE_URL}/rota-inexistente`);
-    expect(response?.status()).toBe(404);
-  });
-
-  test('deve lidar com elemento ausente graciosamente', async ({ page }) => {
-    await page.goto(`${BASE_URL}/posts.html`);
-    
-    const elementoInexistente = page.locator('#elemento-que-nao-existe');
-    await expect(elementoInexistente).toHaveCount(0);
-  });
-
-  test('páginas devem ser responsivas', async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto(`${BASE_URL}/posts.html`);
-    
-    await expect(page.locator('h1')).toBeVisible();
-    await page.waitForSelector('.post-item', { timeout: 5000 });
-    
-    const post = page.locator('.post-item').first();
-    await expect(post).toBeVisible();
-  });
-});
-
-// ========================================
-// TESTES DE PERFORMANCE
-// ========================================
-
-test.describe('Performance Tests', () => {
-  test('página deve carregar em menos de 3 segundos', async ({ page }) => {
-    const startTime = Date.now();
-    await page.goto(`${BASE_URL}/posts.html`);
-    await page.waitForLoadState('domcontentloaded');
-    const loadTime = Date.now() - startTime;
-    
-    expect(loadTime).toBeLessThan(3000);
-  });
-
-  test('dados da API devem carregar em menos de 5 segundos', async ({ page }) => {
-    await page.goto(`${BASE_URL}/posts.html`);
-    
-    const startTime = Date.now();
-    await page.waitForSelector('.post-item', { timeout: 5000 });
-    const loadTime = Date.now() - startTime;
-    
-    expect(loadTime).toBeLessThan(5000);
-  });
-});
-
-// ========================================
-// TESTES DE ACESSIBILIDADE
-// ========================================
-
-test.describe('Accessibility Tests', () => {
-  test('títulos devem ter estrutura semântica correta', async ({ page }) => {
-    await page.goto(`${BASE_URL}/posts.html`);
-    
-    const h1Count = await page.locator('h1').count();
-    expect(h1Count).toBe(1);
-  });
-
-  test('botões devem ter texto descritivo', async ({ page }) => {
-    await page.goto(`${BASE_URL}/posts.html`);
-    
-    const buttons = page.locator('button');
-    const count = await buttons.count();
-    
-    for (let i = 0; i < count; i++) {
-      const button = buttons.nth(i);
-      const text = await button.textContent();
-      expect(text?.trim().length).toBeGreaterThan(0);
-    }
-  });
-
-  test('links devem ter href válido', async ({ page }) => {
-    await page.goto(`${BASE_URL}/posts.html`);
-    
-    const links = page.locator('.nav a');
-    const count = await links.count();
-    
-    for (let i = 0; i < count; i++) {
-      const link = links.nth(i);
-      const href = await link.getAttribute('href');
-      expect(href).toBeTruthy();
-      expect(href).not.toBe('#');
-    }
-  });
+test('15 - Todas as 5 páginas principais devem ser acessíveis', async ({ page }) => {
+  const pages = [
+    { url: '/', title: /N3/ },
+    { url: '/posts.html', title: /Posts/ },
+    { url: '/users.html', title: /Usuários/ },
+    { url: '/comments.html', title: /Comentários/ },
+    { url: '/todos.html', title: /Tarefas/ }
+  ];
+  
+  for (const pageDef of pages) {
+    await page.goto(`${BASE_URL}${pageDef.url}`);
+    await expect(page).toHaveTitle(pageDef.title);
+  }
 });

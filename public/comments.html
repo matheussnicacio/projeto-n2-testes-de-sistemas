@@ -18,6 +18,30 @@
             padding: 20px;
         }
 
+        nav {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: #667eea;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        nav a:hover {
+            background: #667eea;
+            color: white;
+        }
+
         .header {
             text-align: center;
             color: white;
@@ -30,21 +54,41 @@
             margin-bottom: 10px;
         }
 
-        .back-button {
-            display: inline-block;
+        .controls {
             background: white;
-            color: #667eea;
-            padding: 10px 20px;
-            border-radius: 25px;
-            text-decoration: none;
+            padding: 20px;
+            border-radius: 10px;
             margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .controls select,
+        .controls button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: 2px solid #667eea;
+            font-size: 1em;
+        }
+
+        .controls select {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .controls button {
+            background: #667eea;
+            color: white;
+            cursor: pointer;
             transition: all 0.3s;
             font-weight: bold;
         }
 
-        .back-button:hover {
+        .controls button:hover {
+            background: #764ba2;
             transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .container {
@@ -69,57 +113,6 @@
             max-width: 600px;
         }
 
-        .search-box {
-            max-width: 600px;
-            margin: 0 auto 30px;
-            position: relative;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 15px 50px 15px 20px;
-            border: none;
-            border-radius: 30px;
-            font-size: 1em;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-            outline: none;
-            transition: all 0.3s;
-        }
-
-        .search-input:focus {
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .search-icon {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.3em;
-            color: #667eea;
-        }
-
-        .stats-banner {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-            animation: fadeIn 0.8s;
-        }
-
-        .stats-banner h3 {
-            color: #667eea;
-            font-size: 2em;
-            margin-bottom: 5px;
-        }
-
-        .stats-banner p {
-            color: #666;
-            font-size: 0.95em;
-        }
-
         .comments-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
@@ -127,7 +120,7 @@
             animation: fadeIn 1s;
         }
 
-        .comment-card {
+        .comment-item {
             background: white;
             border-radius: 18px;
             padding: 22px;
@@ -137,7 +130,7 @@
             overflow: hidden;
         }
 
-        .comment-card::before {
+        .comment-item::before {
             content: '';
             position: absolute;
             top: 0;
@@ -147,7 +140,7 @@
             background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         }
 
-        .comment-card:hover {
+        .comment-item:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
         }
@@ -256,26 +249,29 @@
 </head>
 <body>
     <div class="container">
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="posts.html">Posts</a>
+            <a href="users.html">Usuários</a>
+            <a href="comments.html">Comentários</a>
+            <a href="todos.html">Tarefas</a>
+            <a href="albums.html">Álbuns</a>
+        </nav>
+
         <div class="header">
-            <a href="index.html" class="back-button">← Voltar</a>
             <h1>💬 Comentários</h1>
             <p>Todos os comentários dos posts</p>
         </div>
 
-        <div id="loading" class="loading">Carregando comentários...</div>
-        <div id="error" class="error" style="display: none;"></div>
-        
-        <div id="searchBox" class="search-box" style="display: none;">
-            <input 
-                type="text" 
-                id="searchInput" 
-                class="search-input" 
-                placeholder="Buscar por nome, email ou conteúdo..."
-            >
-            <span class="search-icon">🔍</span>
+        <div class="controls">
+            <select id="postFilter">
+                <option value="">Todos os posts</option>
+            </select>
+            <button id="filterBtn">Filtrar</button>
         </div>
 
-        <div id="statsBanner" class="stats-banner" style="display: none;"></div>
+        <div id="loading" class="loading" style="display: none;">Carregando comentários...</div>
+        <div id="error" class="error" style="display: none;"></div>
 
         <div id="commentsContainer" class="comments-grid"></div>
     </div>
@@ -284,12 +280,31 @@
         const BASE_URL = 'http://localhost:3000';
         let allComments = [];
 
+        async function loadPosts() {
+            try {
+                const response = await fetch(`${BASE_URL}/posts`);
+                const posts = await response.json();
+                
+                const postFilter = document.getElementById('postFilter');
+                posts.forEach(post => {
+                    const option = document.createElement('option');
+                    option.value = post.id;
+                    option.textContent = `Post #${post.id}: ${post.title.substring(0, 30)}...`;
+                    postFilter.appendChild(option);
+                });
+            } catch (err) {
+                console.error('Erro ao carregar posts:', err);
+            }
+        }
+
         async function loadComments() {
             const loading = document.getElementById('loading');
             const error = document.getElementById('error');
             const container = document.getElementById('commentsContainer');
-            const searchBox = document.getElementById('searchBox');
-            const statsBanner = document.getElementById('statsBanner');
+
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            container.innerHTML = '';
 
             try {
                 const response = await fetch(`${BASE_URL}/comments`);
@@ -308,15 +323,6 @@
                 }
 
                 allComments = comments;
-
-                // Mostrar estatísticas
-                statsBanner.style.display = 'block';
-                statsBanner.innerHTML = `
-                    <h3>${comments.length}</h3>
-                    <p>Comentários publicados</p>
-                `;
-
-                searchBox.style.display = 'block';
                 renderComments(comments);
 
             } catch (err) {
@@ -332,13 +338,13 @@
             container.innerHTML = '';
 
             if (comments.length === 0) {
-                container.innerHTML = '<div class="no-results">😕 Nenhum comentário encontrado com sua busca.</div>';
+                container.innerHTML = '<div class="no-results">😕 Nenhum comentário encontrado.</div>';
                 return;
             }
 
             comments.forEach(comment => {
                 const commentCard = document.createElement('div');
-                commentCard.className = 'comment-card';
+                commentCard.className = 'comment-item';
                 commentCard.innerHTML = `
                     <div class="comment-header">
                         <div class="comment-avatar">💬</div>
@@ -356,20 +362,27 @@
             });
         }
 
-        // Busca em tempo real
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            
+        function filterComments() {
+            const postFilter = document.getElementById('postFilter');
+            const selectedPostId = postFilter.value;
+
+            if (!selectedPostId) {
+                renderComments(allComments);
+                return;
+            }
+
             const filtered = allComments.filter(comment => 
-                comment.name.toLowerCase().includes(searchTerm) ||
-                comment.email.toLowerCase().includes(searchTerm) ||
-                comment.body.toLowerCase().includes(searchTerm)
+                comment.postId.toString() === selectedPostId
             );
-
             renderComments(filtered);
-        });
+        }
 
-        window.addEventListener('DOMContentLoaded', loadComments);
+        document.getElementById('filterBtn').addEventListener('click', filterComments);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadPosts();
+            loadComments();
+        });
     </script>
 </body>
 </html>

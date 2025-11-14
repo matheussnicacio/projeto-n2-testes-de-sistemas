@@ -7,12 +7,39 @@ const PORT = 8080;
 app.use(express.static('public'));
 app.use(express.json());
 
-// Dados mockados
+// Dados mockados COMPLETOS
 const mockData = {
   users: [
-    { id: 1, name: 'João Silva', email: 'joao@email.com', username: 'joao123', address: { city: 'São Paulo' } },
-    { id: 2, name: 'Maria Santos', email: 'maria@email.com', username: 'maria456', address: { city: 'Rio de Janeiro' } },
-    { id: 3, name: 'Pedro Costa', email: 'pedro@email.com', username: 'pedro789', address: { city: 'Belo Horizonte' } }
+    { 
+      id: 1, 
+      name: 'João Silva', 
+      email: 'joao@email.com', 
+      username: 'joao123',
+      phone: '(11) 98765-4321',
+      website: 'joao.com.br',
+      company: { name: 'Tech Corp' },
+      address: { city: 'São Paulo' } 
+    },
+    { 
+      id: 2, 
+      name: 'Maria Santos', 
+      email: 'maria@email.com', 
+      username: 'maria456',
+      phone: '(21) 97654-3210',
+      website: 'maria.com.br',
+      company: { name: 'Design Studio' },
+      address: { city: 'Rio de Janeiro' } 
+    },
+    { 
+      id: 3, 
+      name: 'Pedro Costa', 
+      email: 'pedro@email.com', 
+      username: 'pedro789',
+      phone: '(31) 96543-2109',
+      website: 'pedro.com.br',
+      company: { name: 'Dev Solutions' },
+      address: { city: 'Belo Horizonte' } 
+    }
   ],
   posts: [
     { userId: 1, id: 1, title: 'Primeiro Post', body: 'Conteúdo do primeiro post' },
@@ -140,7 +167,7 @@ app.get('/error', (req, res) => {
 
 // Iniciar servidor
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(`✅ Servidor rodando em http://localhost:${PORT}`);
 });
 
 module.exports = app;

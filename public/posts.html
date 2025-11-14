@@ -18,6 +18,30 @@
             padding: 20px;
         }
 
+        nav {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: #667eea;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        nav a:hover {
+            background: #667eea;
+            color: white;
+        }
+
         .header {
             text-align: center;
             color: white;
@@ -30,21 +54,41 @@
             margin-bottom: 10px;
         }
 
-        .back-button {
-            display: inline-block;
+        .controls {
             background: white;
-            color: #667eea;
-            padding: 10px 20px;
-            border-radius: 25px;
-            text-decoration: none;
+            padding: 20px;
+            border-radius: 10px;
             margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .controls select,
+        .controls button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: 2px solid #667eea;
+            font-size: 1em;
+        }
+
+        .controls select {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .controls button {
+            background: #667eea;
+            color: white;
+            cursor: pointer;
             transition: all 0.3s;
             font-weight: bold;
         }
 
-        .back-button:hover {
+        .controls button:hover {
+            background: #764ba2;
             transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .container {
@@ -76,7 +120,7 @@
             animation: fadeIn 1s;
         }
 
-        .post-card {
+        .post-item {
             background: white;
             border-radius: 15px;
             padding: 25px;
@@ -84,12 +128,12 @@
             transition: all 0.3s;
         }
 
-        .post-card:hover {
+        .post-item:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
         }
 
-        .post-id {
+        .post-meta {
             display: inline-block;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -114,15 +158,6 @@
             font-size: 0.95em;
         }
 
-        .post-user {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 2px solid #f0f0f0;
-            color: #667eea;
-            font-weight: bold;
-            font-size: 0.9em;
-        }
-
         @keyframes fadeInDown {
             from {
                 opacity: 0;
@@ -138,28 +173,76 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
+
+        @media (max-width: 768px) {
+            .posts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="posts.html">Posts</a>
+            <a href="users.html">Usuários</a>
+            <a href="comments.html">Comentários</a>
+            <a href="todos.html">Tarefas</a>
+            <a href="albums.html">Álbuns</a>
+        </nav>
+
         <div class="header">
-            <a href="index.html" class="back-button">← Voltar</a>
-            <h1>📝 Posts</h1>
+            <h1>📝 Lista de Posts</h1>
             <p>Todos os posts disponíveis</p>
         </div>
 
-        <div id="loading" class="loading">Carregando posts...</div>
+        <div class="controls">
+            <select id="userFilter">
+                <option value="">Todos os usuários</option>
+            </select>
+            <button id="filterBtn">Filtrar</button>
+            <button id="loadPosts">Carregar Posts</button>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">Carregando posts...</div>
         <div id="error" class="error" style="display: none;"></div>
         <div id="postsContainer" class="posts-grid"></div>
     </div>
 
     <script>
         const BASE_URL = 'http://localhost:3000';
+        let allPosts = [];
+
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${BASE_URL}/users`);
+                if (!response.ok) return;
+                
+                const users = await response.json();
+                const userFilter = document.getElementById('userFilter');
+                
+                users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = `${user.name} (ID: ${user.id})`;
+                    userFilter.appendChild(option);
+                });
+            } catch (err) {
+                console.error('Erro ao carregar usuários:', err);
+            }
+        }
 
         async function loadPosts() {
             const loading = document.getElementById('loading');
             const error = document.getElementById('error');
             const container = document.getElementById('postsContainer');
+            const userFilter = document.getElementById('userFilter');
+
+            userFilter.value = '';
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            container.innerHTML = '';
 
             try {
                 const response = await fetch(`${BASE_URL}/posts`);
@@ -168,26 +251,16 @@
                     throw new Error(`HTTP ${response.status}`);
                 }
 
-                const posts = await response.json();
+                allPosts = await response.json();
                 loading.style.display = 'none';
 
-                if (!Array.isArray(posts) || posts.length === 0) {
+                if (!Array.isArray(allPosts) || allPosts.length === 0) {
                     error.textContent = 'Nenhum post encontrado.';
                     error.style.display = 'block';
                     return;
                 }
 
-                posts.forEach(post => {
-                    const postCard = document.createElement('div');
-                    postCard.className = 'post-card';
-                    postCard.innerHTML = `
-                        <div class="post-id">Post #${post.id}</div>
-                        <h2 class="post-title">${post.title}</h2>
-                        <p class="post-body">${post.body}</p>
-                        <div class="post-user">👤 Usuário ID: ${post.userId}</div>
-                    `;
-                    container.appendChild(postCard);
-                });
+                displayPosts(allPosts);
 
             } catch (err) {
                 loading.style.display = 'none';
@@ -197,7 +270,42 @@
             }
         }
 
-        window.addEventListener('DOMContentLoaded', loadPosts);
+        function displayPosts(posts) {
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = '';
+
+            posts.forEach(post => {
+                const postCard = document.createElement('div');
+                postCard.className = 'post-item';
+                postCard.innerHTML = `
+                    <div class="post-meta">Post ID: ${post.id} | User ID: ${post.userId}</div>
+                    <h2 class="post-title">${post.title}</h2>
+                    <p class="post-body">${post.body}</p>
+                `;
+                container.appendChild(postCard);
+            });
+        }
+
+        function filterPosts() {
+            const userFilter = document.getElementById('userFilter');
+            const selectedUserId = userFilter.value;
+
+            if (!selectedUserId) {
+                displayPosts(allPosts);
+                return;
+            }
+
+            const filtered = allPosts.filter(post => 
+                post.userId.toString() === selectedUserId
+            );
+            displayPosts(filtered);
+        }
+
+        document.getElementById('loadPosts').addEventListener('click', loadPosts);
+        document.getElementById('filterBtn').addEventListener('click', filterPosts);
+
+        loadUsers();
+        loadPosts();
     </script>
 </body>
 </html>
